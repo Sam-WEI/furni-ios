@@ -1,4 +1,6 @@
+#ifdef __OBJC__
 #import <UIKit/UIKit.h>
+#endif
 
 #import "STPAddCardViewController.h"
 #import "STPAddress.h"
@@ -25,6 +27,7 @@
 #import "STPPaymentMethod.h"
 #import "STPPaymentMethodsViewController.h"
 #import "STPPaymentResult.h"
+#import "STPShippingAddressViewController.h"
 #import "STPSource.h"
 #import "STPTheme.h"
 #import "STPToken.h"

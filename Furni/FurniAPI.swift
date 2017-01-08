@@ -16,18 +16,40 @@
 
 import Foundation
 import Alamofire
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
 
-private typealias JSONObject = [String : AnyObject]
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
+
+private typealias JSONObject = [String : Any]
+
+
 
 final class FurniAPI {
     static let sharedInstance = FurniAPI()
 
     // API base URL.
-    private let apiBaseURL = "https://vso4w24kxa.execute-api.us-east-1.amazonaws.com/prod/"
+    fileprivate let apiBaseURL = "https://vso4w24kxa.execute-api.us-east-1.amazonaws.com/prod/"
 
-    private var cachedCollections: [Collection] = []
+    fileprivate var cachedCollections: [Collection] = []
 
-    func getCollectionList(completion: [Collection] -> Void) {
+    func getCollectionList(_ completion: @escaping ([Collection]) -> Void) {
         if cachedCollections.count > 0 {
             completion(cachedCollections)
         }
@@ -45,7 +67,7 @@ final class FurniAPI {
         }
     }
 
-    func getCollection(permalink: String, completion: Collection -> Void) {
+    func getCollection(_ permalink: String, completion: @escaping (Collection) -> Void) {
         let collection = self.cachedCollections.filter{ $0.permalink == permalink }.first
         if collection?.products.count > 0 {
             completion(collection!)
@@ -63,54 +85,51 @@ final class FurniAPI {
     }
 
     // Convenience method to perform a GET request on an API endpoint.
-    private func get(endpoint: String, completion: AnyObject? -> Void) {
-        request(endpoint, method: "GET", encoding: .JSON, parameters: nil, completion: completion)
+    fileprivate func get(_ endpoint: String, completion: @escaping (Any?) -> Void) {
+        request(endpoint, method: HTTPMethod.get, encoding: JSONEncoding.default, parameters: nil, completion: completion)
     }
 
     // Convenience method to perform a POST request on an API endpoint.
-    private func post(endpoint: String, parameters: [String: AnyObject]?, completion: AnyObject? -> Void) {
-        request(endpoint, method: "POST", encoding: .JSON, parameters: parameters, completion: completion)
+    fileprivate func post(_ endpoint: String, parameters: [String: Any]?, completion: @escaping (Any?) -> Void) {
+        request(endpoint, method: HTTPMethod.post, encoding: JSONEncoding.default, parameters: parameters, completion: completion)
     }
 
     // Perform a request on an API endpoint using Alamofire.
-    private func request(endpoint: String, method: String, encoding: Alamofire.ParameterEncoding, parameters: [String: AnyObject]?, completion: AnyObject? -> Void) {
-        let URL = NSURL(string: apiBaseURL + endpoint)!
-        let URLRequest = NSMutableURLRequest(URL: URL)
-        URLRequest.HTTPMethod = method
-
-        let request = encoding.encode(URLRequest, parameters: parameters).0
-
+    fileprivate func request(_ endpoint: String, method: HTTPMethod, encoding: Alamofire.ParameterEncoding, parameters: [String: Any]?, completion: @escaping (Any?) -> Void) {
+        let URL = Foundation.URL(string: apiBaseURL + endpoint)!
+//        let URLRequest = NSMutableURLRequest(url: URL)
+//        URLRequest.httpMethod = method
         print("Starting \(method) \(URL) (\(parameters ?? [:]))")
-        Alamofire.request(request).responseJSON { _, response, result in
-            print("Finished \(method) \(URL): \(response?.statusCode)")
-            switch result {
-            case .Success(let JSON):
+        Alamofire.request(URL, method: method, parameters: parameters, encoding: encoding, headers: nil).responseJSON(completionHandler: { response in
+            
+            print("Finished \(method) \(URL): \(response.response?.statusCode)")
+            switch response.result {
+            case .success(let JSON):
                 completion(JSON)
-            case .Failure(let data, let error):
+            case .failure(let error):
                 print("Request failed with error: \(error)")
-                if let data = data {
-                    print("Response data: \(NSString(data: data, encoding: NSUTF8StringEncoding)!)")
-                }
-
+                
                 completion(nil)
             }
-        }
+            
+            
+        })
     }
 }
 
 final class AuthenticatedFurniAPI {
     typealias CognitoID = String
-    private let cognitoID: CognitoID
+    fileprivate let cognitoID: CognitoID
 
     init(cognitoID: CognitoID) {
         self.cognitoID = cognitoID
     }
 
-    func registerUser(digitsUserID: String?, digitsPhoneNumber: String?, completion: Bool -> ()) {
-        var parameters: JSONObject = ["cognitoId": self.cognitoID]
+    func registerUser(_ digitsUserID: String?, digitsPhoneNumber: String?, completion: @escaping (Bool) -> ()) {
+        var parameters: JSONObject = ["cognitoId": self.cognitoID as AnyObject]
         if let digitsUserID = digitsUserID, let digitsPhoneNumber = digitsPhoneNumber {
-            parameters["digitsId"] = digitsUserID
-            parameters["phoneNumber"] = digitsPhoneNumber
+            parameters["digitsId"] = digitsUserID as AnyObject?
+            parameters["phoneNumber"] = digitsPhoneNumber as AnyObject?
         }
 
         FurniAPI.sharedInstance.post("users/", parameters: parameters) { response in
@@ -120,9 +139,9 @@ final class AuthenticatedFurniAPI {
         }
     }
 
-    func favoriteProduct(favorite: Bool, product: Product, completion: Bool -> ()) {
+    func favoriteProduct(_ favorite: Bool, product: Product, completion: @escaping (Bool) -> ()) {
         product.isFavorited = favorite
-        FurniAPI.sharedInstance.request("favorites", method: favorite ? "POST" : "DELETE", encoding: .JSON, parameters: [
+        FurniAPI.sharedInstance.request("favorites", method: favorite ? HTTPMethod.post : HTTPMethod.delete, encoding: JSONEncoding.default, parameters: [
             "product": "\(product.id)",
             "collection": product.collectionPermalink,
             "cognitoId": self.cognitoID]) { response in
@@ -135,11 +154,11 @@ final class AuthenticatedFurniAPI {
         }
     }
 
-    func userFavoriteProducts(completion: [Product]? -> ()) {
+    func userFavoriteProducts(_ completion: @escaping ([Product]?) -> ()) {
         favoriteProducts(self.cognitoID) { completion($0?[self.cognitoID] ?? []) }
     }
 
-    private func favoriteProducts(cognitoID: CognitoID?, completion: [CognitoID : [Product]]? -> ()) {
+    fileprivate func favoriteProducts(_ cognitoID: CognitoID?, completion: @escaping ([CognitoID : [Product]]?) -> ()) {
         let path = cognitoID ?? ""
         FurniAPI.sharedInstance.get("favorites/\(path)") { response in
             guard let productDictionariesPerCognitoID = response as? JSONObject else {
@@ -157,7 +176,7 @@ final class AuthenticatedFurniAPI {
                     return
                 }
 
-                let products = productDictionaries.map { Product(dictionary: $0, collectionPermalink: ($0["collection"] as? String) ?? "") }.sort { $0.id > $1.id }
+                let products = productDictionaries.map { Product(dictionary: $0, collectionPermalink: ($0["collection"] as? String) ?? "") }.sorted { $0.id > $1.id }
 
                 productsPerCognitoID[cognitoID] = products
             }
@@ -166,10 +185,10 @@ final class AuthenticatedFurniAPI {
         }
     }
 
-    func uploadDigitsFriends(digitsUserIDs digitsUserIDs: [String], completion: Bool -> ()) {
+    func uploadDigitsFriends(digitsUserIDs: [String], completion: @escaping (Bool) -> ()) {
         FurniAPI.sharedInstance.post("friendships", parameters: [
-            "from": self.cognitoID,
-            "to": digitsUserIDs
+            "from": self.cognitoID as AnyObject,
+            "to": digitsUserIDs as AnyObject
             ]) { response in
                 print("\(response as! NSDictionary)")
                 let success = response != nil
@@ -178,7 +197,7 @@ final class AuthenticatedFurniAPI {
         }
     }
 
-    func friends(completion: [User]? -> ()) {
+    func friends(_ completion: @escaping ([User]?) -> ()) {
         FurniAPI.sharedInstance.get("friendships/\(self.cognitoID)") { response in
             guard let result = response as? JSONObject,
                 let friendsDictionaries = result["friends"] as? [JSONObject] else {

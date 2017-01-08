@@ -188,7 +188,7 @@ static NSString *const stripeAPIVersion = @"2015-10-12";
             details[@"vendor_identifier"] = vendorIdentifier;
         }
     }
-    return [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:[details copy] options:0 error:NULL] encoding:NSUTF8StringEncoding];
+    return [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:[details copy] options:(NSJSONWritingOptions)kNilOptions error:NULL] encoding:NSUTF8StringEncoding];
 }
 
 #pragma mark Fabric
@@ -259,21 +259,22 @@ static NSString *const stripeAPIVersion = @"2015-10-12";
     return [[[paymentRequest.paymentSummaryItems lastObject] amount] floatValue] > 0;
 }
 
-+ (BOOL)deviceSupportsApplePay {
-    return [PKPaymentAuthorizationViewController class] && [PKPaymentAuthorizationViewController canMakePaymentsUsingNetworks:@[PKPaymentNetworkAmex, PKPaymentNetworkMasterCard, PKPaymentNetworkVisa]];
-}
-
-+ (PKPaymentRequest *)paymentRequestWithMerchantIdentifier:(NSString *)merchantIdentifier {
-    if (![PKPaymentRequest class]) {
-        return nil;
-    }
-    PKPaymentRequest *paymentRequest = [PKPaymentRequest new];
-    [paymentRequest setMerchantIdentifier:merchantIdentifier];
++ (NSArray<NSString *> *)supportedPKPaymentNetworks {
     NSArray *supportedNetworks = @[PKPaymentNetworkAmex, PKPaymentNetworkMasterCard, PKPaymentNetworkVisa];
     if ((&PKPaymentNetworkDiscover) != NULL) {
         supportedNetworks = [supportedNetworks arrayByAddingObject:PKPaymentNetworkDiscover];
     }
-    [paymentRequest setSupportedNetworks:supportedNetworks];
+    return supportedNetworks;
+}
+
++ (BOOL)deviceSupportsApplePay {
+    return [PKPaymentAuthorizationViewController class] && [PKPaymentAuthorizationViewController canMakePaymentsUsingNetworks:[self supportedPKPaymentNetworks]];
+}
+
++ (PKPaymentRequest *)paymentRequestWithMerchantIdentifier:(NSString *)merchantIdentifier {
+    PKPaymentRequest *paymentRequest = [PKPaymentRequest new];
+    [paymentRequest setMerchantIdentifier:merchantIdentifier];
+    [paymentRequest setSupportedNetworks:[self supportedPKPaymentNetworks]];
     [paymentRequest setMerchantCapabilities:PKMerchantCapability3DS];
     [paymentRequest setCountryCode:@"US"];
     [paymentRequest setCurrencyCode:@"USD"];

@@ -40,6 +40,8 @@
 		BF0428791BC5968F00CD42ED /* ProductPreviewCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0428781BC5968F00CD42ED /* ProductPreviewCollectionViewCell.swift */; };
 		BF50ED9C1BC7394A00776DD4 /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF50ED9B1BC7394A00776DD4 /* AccountManager.swift */; };
 		BFBA530F1BCEF9FC0053BF6B /* FriendFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBA530E1BCEF9FC0053BF6B /* FriendFooterView.swift */; };
+		CB7C1C0B1E2201B60050971E /* TwitterKitResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = CB7C1C091E2201B60050971E /* TwitterKitResources.bundle */; };
+		CB7C1C0C1E2201B60050971E /* DigitsKitResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = CB7C1C0A1E2201B60050971E /* DigitsKitResources.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,6 +98,8 @@
 		BF0428781BC5968F00CD42ED /* ProductPreviewCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProductPreviewCollectionViewCell.swift; sourceTree = "<group>"; };
 		BF50ED9B1BC7394A00776DD4 /* AccountManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountManager.swift; sourceTree = "<group>"; };
 		BFBA530E1BCEF9FC0053BF6B /* FriendFooterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendFooterView.swift; sourceTree = "<group>"; };
+		CB7C1C091E2201B60050971E /* TwitterKitResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = TwitterKitResources.bundle; path = Pods/TwitterKit/iOS/TwitterKit.framework/Versions/A/Resources/TwitterKitResources.bundle; sourceTree = SOURCE_ROOT; };
+		CB7C1C0A1E2201B60050971E /* DigitsKitResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = DigitsKitResources.bundle; path = Pods/Digits/iOS/DigitsKit.framework/Versions/A/Resources/DigitsKitResources.bundle; sourceTree = SOURCE_ROOT; };
 		D8E0EA6226FBB7980CE8564A /* Pods-Furni.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Furni.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Furni/Pods-Furni.debug.xcconfig"; sourceTree = "<group>"; };
 		E7B3827703162ACA962887BB /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -190,6 +194,8 @@
 		929C1EA31B7F8AC70045C970 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				CB7C1C091E2201B60050971E /* TwitterKitResources.bundle */,
+				CB7C1C0A1E2201B60050971E /* DigitsKitResources.bundle */,
 				929C1EA41B7F8AC70045C970 /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -271,6 +277,7 @@
 				929C1E9E1B7F8AC70045C970 /* Resources */,
 				63309F9591F6768389A28671 /* [CP] Embed Pods Frameworks */,
 				A327470B22FECB76300FEA0B /* [CP] Copy Pods Resources */,
+				CB5EB3C71E21B68100AE627B /* Run Script */,
 			);
 			buildRules = (
 			);
@@ -313,6 +320,7 @@
 					929C1E9F1B7F8AC70045C970 = {
 						CreatedOnToolsVersion = 6.4;
 						DevelopmentTeam = GFTZW43FBX;
+						LastSwiftMigration = 0800;
 						SystemCapabilities = {
 							com.apple.OMC = {
 								enabled = 1;
@@ -321,6 +329,7 @@
 					};
 					929C1EB41B7F8AC70045C970 = {
 						CreatedOnToolsVersion = 6.4;
+						LastSwiftMigration = 0800;
 						TestTargetID = 929C1E9F1B7F8AC70045C970;
 					};
 				};
@@ -349,6 +358,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB7C1C0C1E2201B60050971E /* DigitsKitResources.bundle in Resources */,
+				CB7C1C0B1E2201B60050971E /* TwitterKitResources.bundle in Resources */,
 				929C1EAB1B7F8AC70045C970 /* Main.storyboard in Resources */,
 				92A0282A1BC4AE8A00E0B097 /* LaunchScreen.storyboard in Resources */,
 				929C1EAD1B7F8AC70045C970 /* Images.xcassets in Resources */,
@@ -407,8 +418,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
+		};
+		CB5EB3C71E21B68100AE627B /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Fabric/run\" 13445154b23425685a332f1f4827f9a641c42bf5 38d2f95d62bc10bac4aee708a229a0f99e6d0c75e171e86553570c04871dfd7f";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -589,6 +614,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -612,6 +638,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -632,6 +659,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "xyz.furni.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Furni.app/Furni";
 			};
 			name = Debug;
@@ -648,6 +676,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "xyz.furni.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Furni.app/Furni";
 			};
 			name = Release;
